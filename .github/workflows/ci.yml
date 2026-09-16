@@ -1,26 +1,19 @@
-name: CI Pipeline
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
+name: RAG Project CI
+on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: 1. Download Code
-        uses: actions/checkout@v4
-        
-      - name: 2. Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-          
-      - name: 3. Install Libraries
-        run: pip install -r requirements.txt
-        
-      - name: 4. Test Project
-        run: python -c "print('CI Passed')"
+      - name: Install Libraries
+        run: |
+          pip install -r requirements.txt
+          pip install langchain faiss-cpu pypdf
+      - name: Test if RAG Code Breaks
+        run: |
+          python -m py_compile *.py || echo "No py files"
+          jupyter nbconvert --to notebook --execute Copy_of_Rag_analysis_pynb.ipynb --output /tmp/test.ipynb
+          echo "RAG Notebook OK - Code ভাঙে নাই!"
